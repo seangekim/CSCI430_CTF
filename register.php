@@ -13,7 +13,7 @@ $userErr = $passErr = "";
 $error = FALSE;
 $user = $pass = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "GET") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if (empty($_GET["user"])) {
     $error = TRUE;
     $userErr = "Username is required"; 
@@ -47,13 +47,13 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
       echo "Failed to connect to MySQL: " . $mysqli->connect_error;
       exit();
     }
+    //password is hashed before the preparation of the sql statement
+    // Hash password before storing it
+    $hashedPass = password_hash($pass, PASSWORD_DEFAULT);
 
     // Prepare statement to insert user data
     $stmt = $mysqli->prepare("INSERT INTO users (username, password, some_other_field) VALUES (?, ?, 0)");
     $stmt->bind_param("ss", $user, $hashedPass); // 'ss' denotes two strings
-
-    // Hash password before storing it
-    $hashedPass = password_hash($pass, PASSWORD_DEFAULT);
 
     // Execute the prepared statement
     $stmt->execute();
@@ -75,7 +75,7 @@ function test_input($data) {
 
 <h2>PHP Form Validation Example</h2>
 <p><span class="error">* required field</span></p>
-<form method="get" action="index.php">
+<form method="post" action="index.php">
   Username: <input type="text" name="user" value="<?php echo htmlspecialchars($user); ?>"> <!-- Corrected attribute to 'name' -->
   <span class="error">* <?php echo $userErr; ?></span>
   <br><br>
