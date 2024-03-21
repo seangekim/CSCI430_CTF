@@ -8,56 +8,63 @@
 <body>  
 
 <?php
-// define variables and set to empty values
+// Define variables and set to empty values
 $userErr = $passErr = "";
 $error = FALSE;
 $user = $pass = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "GET") {
-  if (empty($_GET["user"])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  if (empty($_POST["user"])) {
     $error = TRUE;
-    $nameErr = "Username is required";
+    $userErr = "Username is required"; 
   } else {
-    $user = test_input($_GET["user"]);
-    // check if username only contains letters
-    if (!preg_match("/^[a-zA-Z0-9]*$/",$user)) {
+    $user = test_input($_POST["user"]);
+    // Check if username only contains letters and numbers
+    if (!preg_match("/^[a-zA-Z0-9]*$/", $user)) {
       $userErr = "Only letters and numbers allowed";
       $error = TRUE;
     }
   }
   
-  if (empty($_GET["pass"])) {
+  if (empty($_POST["pass"])) {
     $passErr = "Password is required";
     $error = TRUE;
   } else {
-    $pass = test_input($_GET["pass"]);
-    // check if password is long enough
-     if (strlen($pass) < 8) {
+    $pass = test_input($_POST["pass"]);
+    // Check if password is long enough
+    if (strlen($pass) < 8) {
       $passErr = "Password too short";
       $error = TRUE;
     }
   }
 
- if (!$error)
- {
-     $mysqli = new mysqli("localhost","root", "root", "bank");
-     
-     // Check connection
-     if ($mysqli -> connect_errno) {
-       echo "Failed to connect to MySQL: " . $mysqli -> connect_error;
-       exit();
-    }
-     // Perform query
-     $stmt = "insert into users values(\"" . $user . "\", \"" . $pass . "\", 0)";
-
-    $mysqli -> query($stmt); 
-
-$mysqli -> close();
-
- }
-
-}
+  if (!$error) {
+    // Connect to MySQL database
+    $mysqli = new mysqli("localhost", "root", "root", "bank");
     
+    // Check connection
+    if ($mysqli->connect_errno) {
+      echo "Failed to connect to MySQL: " . $mysqli->connect_error;
+      exit();
+    }
+    //password is hashed before the preparation of the sql statement
+    // Hash password before storing it
+    $hashedPass = password_hash($pass, PASSWORD_DEFAULT);
+
+    // Prepare statement to insert user data
+    $stmt = $mysqli->prepare("INSERT INTO users (username, password, some_other_field) VALUES (?, ?, 0)");
+    $stmt->bind_param("ss", $user, $hashedPass); // 'ss' denotes two strings
+
+    // Execute the prepared statement
+    $stmt->execute();
+
+    // Close statement and connection
+    $stmt->close();
+    $mysqli->close();
+  }
+}
+
+// Function to sanitize input data
 function test_input($data) {
   $data = trim($data);
   $data = stripslashes($data);
@@ -68,21 +75,23 @@ function test_input($data) {
 
 <h2>PHP Form Validation Example</h2>
 <p><span class="error">* required field</span></p>
-<form method="get" action="index.php">
-  Username: <input type="text" user="user" value="<?php echo $user;?>">
-  <span class="error">* <?php echo $userErr;?></span>
+<form method="post" action="index.php">
+  Username: <input type="text" name="user" value="<?php echo htmlspecialchars($user); ?>"> <!-- Corrected attribute to 'name' -->
+  <span class="error">* <?php echo $userErr; ?></span>
   <br><br>
-  Password: <input type="text" name="pass" value="<?php echo $pass;?>">
-  <span class="error">* <?php echo $passErr;?></span>
+  Password: <input type="password" name="pass" value="<?php echo htmlspecialchars($pass); ?>"> <!-- Changed to 'password' type -->
+  <span class="error">* <?php echo $passErr; ?></span>
   <br><br>
   <input type="submit" name="submit" value="Submit">  
 </form>
 
 <?php
+// Display sanitized user input
 echo "<h2>Your Input:</h2>";
-echo $user;
+echo htmlspecialchars($user);
 echo "<br>";
-echo $pass;
+echo htmlspecialchars($pass);
 ?>
 
 </body>
+</html>
