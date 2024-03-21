@@ -14,11 +14,11 @@ $error = FALSE;
 $user = $pass = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  if (empty($_GET["user"])) {
+  if (empty($_POST["user"])) {
     $error = TRUE;
     $userErr = "Username is required"; 
   } else {
-    $user = test_input($_GET["user"]);
+    $user = test_input($_POST["user"]);
     // Check if username only contains letters and numbers
     if (!preg_match("/^[a-zA-Z0-9]*$/", $user)) {
       $userErr = "Only letters and numbers allowed";
@@ -26,11 +26,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
   }
   
-  if (empty($_GET["pass"])) {
+  if (empty($_POST["pass"])) {
     $passErr = "Password is required";
     $error = TRUE;
   } else {
-    $pass = test_input($_GET["pass"]);
+    $pass = test_input($_POST["pass"]);
     // Check if password is long enough
     if (strlen($pass) < 8) {
       $passErr = "Password too short";
