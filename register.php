@@ -52,8 +52,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hashedPass = password_hash($pass, PASSWORD_DEFAULT);
 
     // Prepare statement to insert user data
-    $stmt = $mysqli->prepare("INSERT INTO users (username, password, some_other_field) VALUES (?, ?, 0)");
-    $stmt->bind_param("ss", $user, $hashedPass); // 'ss' denotes two strings
+    $stmt = $mysqli->prepare("INSERT INTO users (name, pass, balance) VALUES (?, ?, ?)");
+    $balance = 0; //set balance to 0 for new registrations 
+    $stmt->bind_param("ssi", $user, $hashedPass, $balance); // needs two strings and an integer hence ssi
 
     // Execute the prepared statement
     $stmt->execute();
