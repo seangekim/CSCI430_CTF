@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Connection failed: " . $mysqli->connect_error);
     }
 
-    $stmt = $mysqli->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt = $mysqli->prepare("SELECT * FROM users WHERE name = ?");
     
     $stmt->bind_param("s", $_POST['username']);
     
@@ -20,10 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
 
-        if (password_verify($_POST['password'], $user['hashedPass'])) {
+        if (password_verify($_POST['password'], $user['pass'])) {
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $_POST['username'];
-            $_SESSION['user_id'] = $user['id'];
 
             header("Location: welcome.php");
             exit();
