@@ -1,6 +1,15 @@
 <?php
-$username = "Eason";
-$balance = 0;
+session_start();
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+include 'database.php';
+$username = $_SESSION["username"];
+$query = "SELECT balance FROM users WHERE name='$username'";
+$result = mysqli_query($conn, $query);
+$row = mysqli_fetch_assoc($result);
+$balance = $row['balance'];
 ?>
 
 <!DOCTYPE html>

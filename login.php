@@ -1,15 +1,12 @@
 <?php
 // Start the session
 session_start();
+include "database.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $mysqli = new mysqli("localhost", "username", "password", "database");
+    
 
-    if ($mysqli->connect_error) {
-        die("Connection failed: " . $mysqli->connect_error);
-    }
-
-    $stmt = $mysqli->prepare("SELECT * FROM users WHERE name = ?");
+    $stmt = $conn->prepare("SELECT * FROM users WHERE name = ?");
     
     $stmt->bind_param("s", $_POST['username']);
     
@@ -20,11 +17,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
 
-        if (password_verify($_POST['password'], $user['pass'])) {
+        if (password_verify($_POST['password'], $user['password'])) {
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $_POST['username'];
 
-            header("Location: welcome.php");
+            header("Location: index.php");
             exit();
         } else {
             echo "Invalid username or password.";
@@ -37,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 
     // Close the connection
-    $mysqli->close();
+    $conn->close();
 }
 ?>
 
@@ -47,4 +44,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     Password: <input type="password" name="password">
     <br><br>
     <input type="submit" value="Login">
+    <div><p>Not registered yet? <a href="register.php"> Register Here</a></p></div>
+    </div>
 </form>
